@@ -1,0 +1,277 @@
+Proyecto - Tacho de basura automatizado - 09:26 14/6/2023
+
+Componentes{
+	- 1x Arduino UNO
+	- 1x Protoboard
+	- 1x Servomotor S3003
+	- Cables macho-macho, macho-hembra
+	- 2x Sensor ultrasonido HC-SR04
+	- 3x Led
+	- 1x Tacho de basura
+}
+
+Posibles Mejoras{
+	- Microfono para que el tacho se pueda abrir por comando de voz para aquellas personas que no puedan llegar bien a este
+	- Display que indique el estado del tacho (lleno, medio lleno, vacio)
+}
+
+Codigo:
+
+Servo{
+
+#include <Servo.h>
+
+const int servo = 2;
+
+Servo myservo;  // create servo object to control a servo, twelve servo objects can be created on most boards
+
+int pos = 0; // variable to store the servo position
+
+void setup() {
+  myservo.attach(servo);  // attaches the servo on pinServo to the servo object
+  myservo.write(0);
+}
+
+void loop() {
+  for (pos = 0; pos <= 130; pos += 1) { // goes from 0 degrees to 130 degrees in steps of 1 degree
+    myservo.write(pos);                // tell servo to go to position in variable 'pos'
+    delay(15);                        // waits 15ms for the servo to reach the position
+  }
+  delay(2000);
+  for (pos = 130; pos >= 0; pos -= 1) { // goes from 130 degrees to 0 degrees
+    myservo.write(pos);                // tell servo to go to position in variable 'pos'
+    delay(15);                        // waits 15ms for the servo to reach the position
+  }
+}
+
+}
+
+Sensor1 - HC-SR04{
+
+const int trigger = 4;   //Pin digital 4 para el Trigger del sensor
+const int echo = 3;     //Pin digital 3 para el Echo del sensor
+
+long tiempo; //tiempo que demora en llegar el echo
+long distanciaCM; //distancia en centimetros
+
+void setup() {
+  Serial.begin(9600);//inicializamos la comunicación
+  pinMode(trigger, OUTPUT); //pin como salida
+  pinMode(echo, INPUT);  //pin como entrada
+  digitalWrite(trigger, LOW);//Inicializamos el pin con 0
+}
+
+void loop(){
+  digitalWrite(trigger, HIGH);
+  delayMicroseconds(10);          //Enviamos un pulso de 10us
+  digitalWrite(trigger, LOW);
+  
+  tiempo = pulseIn(echo, HIGH); //obtenemos el ancho del pulso
+  distanciaCM = tiempo/58.2;             //escalamos el tiempo a una distancia en cm
+  
+  Serial.print("Distancia: ");
+  Serial.print(distanciaCM);      //Enviamos serialmente el valor de la distancia
+  Serial.print("cm");
+  Serial.println();
+  delay(100);          // Hacemos una pausa de 100ms
+}
+
+}
+
+Sensor2 - HC-SR04{
+
+const int trigger = 5;   //Pin digital 5 para el Trigger del sensor
+const int echo = 6;     //Pin digital 6 para el Echo del sensor
+
+long tiempo; //tiempo que demora en llegar el echo
+long distanciaCM; //distancia en centimetros
+
+void setup() {
+  Serial.begin(9600);//inicializamos la comunicación
+  pinMode(trigger, OUTPUT); //pin como salida
+  pinMode(echo, INPUT);  //pin como entrada
+  digitalWrite(trigger, LOW);//Inicializamos el pin con 0
+}
+
+void loop(){
+  digitalWrite(trigger, HIGH);
+  delayMicroseconds(10);          //Enviamos un pulso de 10us
+  digitalWrite(trigger, LOW);
+  
+  tiempo = pulseIn(echo, HIGH); //obtenemos el ancho del pulso
+  distanciaCM = tiempo/58.2;             //escalamos el tiempo a una distancia en cm
+  
+  Serial.print("Distancia: ");
+  Serial.print(distanciaCM);      //Enviamos serialmente el valor de la distancia
+  Serial.print("cm");
+  Serial.println();
+  delay(100);          // Hacemos una pausa de 100ms
+}
+
+}
+
+Led{
+
+const int ledVerde = 8;
+const int ledVerde = 8;
+const int ledRojo = 9;
+const int ledAmarillo = 10;
+
+void setup() {
+  pinMode(ledVerde, OUTPUT);
+  pinMode(ledRojo, OUTPUT);
+  pinMode(ledAmarillo, OUTPUT);
+
+}
+
+void loop() {
+  digitalWrite(ledVerde, HIGH);
+  digitalWrite(ledAmarillo, LOW);
+  digitalWrite(ledRojo, LOW);
+  delay(2000);
+  
+  digitalWrite(ledVerde, LOW);
+  digitalWrite(ledAmarillo, HIGH);
+  delay(2000);
+
+  digitalWrite(ledAmarillo, LOW);
+  digitalWrite(ledRojo, HIGH);
+  delay(2000);
+}
+
+}
+
+Servo y HC-SR04{
+
+#include <Servo.h>
+
+const int servo = 2;
+
+Servo myservo;  // create servo object to control a servo, twelve servo objects can be created on most boards
+
+int pos = 0;              // variable to store the servo position
+const int trigger = 4;   // pin digital 4 para el Trigger del sensor
+const int echo = 3;     // pin digital 3 para el Echo del sensor
+
+long tiempo;       // tiempo que demora en llegar el echo
+long distanciaCM; // distancia en centimetros
+
+void setup() {
+  Serial.begin(9600);        // inicializamos la comunicación
+  pinMode(trigger, OUTPUT); // pin como salida
+  pinMode(echo, INPUT);    // pin como entrada
+  digitalWrite(trigger, LOW); // inicializamos el pin con 0
+  myservo.attach(servo);  // attaches the servo on pinServo to the servo object
+  myservo.write(0);
+}
+
+void loop(){
+  digitalWrite(trigger, HIGH);
+  delayMicroseconds(10);          // enviamos un pulso de 10us
+  digitalWrite(trigger, LOW);
+  
+  tiempo = pulseIn(echo, HIGH); // obtenemos el ancho del pulso
+  distanciaCM = tiempo/58.2;   // escalamos el tiempo a una distancia en cm
+
+  if (distanciaCM <= 10){
+      for (pos = 0; pos <= 130; pos += 1) { // goes from 0 degrees to 130 degrees in steps of 1 degree
+        myservo.write(pos);                // tell servo to go to position in variable 'pos'
+        delay(15);                        // waits 15ms for the servo to reach the position
+    }
+    delay(2000);
+    for (pos = 130; pos >= 0; pos -= 1) { // goes from 130 degrees to 0 degrees
+      myservo.write(pos);                // tell servo to go to position in variable 'pos'
+      delay(15);                        // waits 15ms for the servo to reach the position
+    }
+  }
+  
+  Serial.print("Distancia: ");
+  Serial.print(distanciaCM);      // Enviamos serialmente el valor de la distancia
+  Serial.print("cm");
+  Serial.println();
+  delay(100);          // Hacemos una pausa de 100ms
+}
+
+}
+
+Led y HC-SR04{
+
+const int trigger = 5;   //Pin digital 5 para el Trigger del sensor
+const int echo = 6;     //Pin digital 6 para el Echo del sensor
+const int ledVerde = 8;
+const int ledRojo = 9;
+const int ledAmarillo = 10;
+
+long tiempo; //tiempo que demora en llegar el echo
+long distanciaCM; //distancia en centimetros
+
+void setup() {
+  Serial.begin(9600);//inicializamos la comunicación
+    
+  pinMode(trigger, OUTPUT); //pin como salida
+  pinMode(echo, INPUT);  //pin como entrada
+  digitalWrite(trigger, LOW);//Inicializamos el pin con 0
+  pinMode(ledVerde, OUTPUT);
+  pinMode(ledRojo, OUTPUT);
+  pinMode(ledAmarillo, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(trigger, HIGH);
+  delayMicroseconds(10);          //Enviamos un pulso de 10us
+  digitalWrite(trigger, LOW);
+  
+  tiempo = pulseIn(echo, HIGH); //obtenemos el ancho del pulso
+  distanciaCM = tiempo/58.2;             //escalamos el tiempo a una distancia en cm
+
+  if (distanciaCM > 11 && distanciaCM <= 22){
+    PrenderLedVerde();
+  }
+  else if (distanciaCM > 5 && distanciaCM <= 11){
+    PrenderLedAmarillo();
+  
+  }
+  else if (distanciaCM <= 5){
+    PrenderLedRojo(); 
+  }
+  
+  Serial.print("Distancia: ");
+  Serial.print(distanciaCM);      //Enviamos serialmente el valor de la distancia
+  Serial.print("cm");
+  Serial.println();
+  delay(100);          // Hacemos una pausa de 100ms
+}
+
+void PrenderLedVerde(){
+  digitalWrite(ledVerde, HIGH);
+  digitalWrite(ledAmarillo, LOW);
+  digitalWrite(ledRojo, LOW);
+//  delay(2000);
+//  digitalWrite(ledVerde, LOW);
+}
+
+void PrenderLedAmarillo(){
+  digitalWrite(ledVerde, LOW);
+  digitalWrite(ledAmarillo, HIGH);
+  digitalWrite(ledRojo, LOW);
+//  delay(2000);
+//  digitalWrite(ledAmarillo, LOW);
+}
+
+void PrenderLedRojo(){
+  digitalWrite(ledVerde, LOW);
+  digitalWrite(ledAmarillo, LOW);
+  digitalWrite(ledRojo, HIGH);
+//  delay(2000);
+//  digitalWrite(ledRojo, LOW);
+}
+
+Nota: habia puesto el delay(2000) y digitalRead(ledX) porque si quitabas la mano del sensor el led quedaba prendido, pero esta mal, debe ir afuera de la funcion
+	PrenderLedX();
+}
+
+Codigo completo{
+
+
+
+}
